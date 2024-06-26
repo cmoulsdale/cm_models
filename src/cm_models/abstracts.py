@@ -308,7 +308,7 @@ class _Details(typing.NamedTuple):
         Scalar value that operators are multiplied by.
     processed_operators : tuple
         Iterable of processed operators from left to right. False is
-        :math:`\hat{\kappa}` and True is :math:`\hat{\kappa}^\dagger`.
+        :math:`\\hat{\kappa}` and True is :math:`\\hat{\kappa}^\dagger`.
     is_off_diagonal : bool
         Whether the element is off the diagonal. Equal to ``n1!=n2``.
     
@@ -329,7 +329,7 @@ class _Details(typing.NamedTuple):
         Scalar value that operators are multiplied by.
     processed_operators : tuple
         Iterable of processed operators from left to right. False is
-        :math:`\hat{\kappa}` and True is :math:`\hat{\kappa}^\dagger`.
+        :math:`\\hat{\kappa}` and True is :math:`\\hat{\kappa}^\dagger`.
     is_off_diagonal : bool
         Whether the element is off the diagonal. Equal to ``n1!=n2``.
     
@@ -453,7 +453,7 @@ class Model2D(Model):
             Scalar value that operators are multiplied by.
         operators : iterable of {"k", "kc"}
             Iterable of operators from left to right. "k" is
-            :math:`\hat{\kappa}` and "kc" is :math:`\hat{\kappa}^\dagger`.
+            :math:`\\hat{\kappa}` and "kc" is :math:`\\hat{\kappa}^\dagger`.
 
         """
 
@@ -480,7 +480,7 @@ class Model2D(Model):
 
         The major matrix elements define the cutoff of the Landau level basis
         in each sublattice such that the conjugate momentum operator,
-        :math:`\hat{\kappa}^\dagger`, cannot raise the index above any
+        :math:`\\hat{\kappa}^\dagger`, cannot raise the index above any
         cutoff. Hence, the major elements must
         constitute the vertices of a spanning tree whose nodes are the
         components of the basis, i.e. ``dim-1`` vertices connecting every
@@ -506,7 +506,7 @@ class Model2D(Model):
             Scalar value that operators are multiplied by.
         operators : iterable of {"k", "kc"}
             Iterable of operators from left to right. "k" is
-            :math:`\hat{\kappa}` and "kc" is :math:`\hat{\kappa}^\dagger`.
+            :math:`\\hat{\kappa}` and "kc" is :math:`\\hat{\kappa}^\dagger`.
 
         """
 
@@ -842,7 +842,7 @@ class Model2D(Model):
     @util.process_args
     def details_levels(self, *, N: int, **model_kwargs) -> _DetailsLevels:
         """Get the model's finite magnetic field details"""
-        
+
         details = self.details(**model_kwargs)
         dim = details.dim
 
@@ -1134,7 +1134,7 @@ class Model2D(Model):
         Returns
         -------
         basis : tuple
-            Hamiltonian basis. Corresponds to sublattices ``\otimes`` basis levels.
+            Hamiltonian basis. Corresponds to sublattices ``\\otimes`` basis levels.
 
         """
 

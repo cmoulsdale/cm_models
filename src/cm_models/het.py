@@ -57,7 +57,7 @@ class _DetailsSuper(typing.NamedTuple):
     basis_super: tuple
     """Basis of zone-folded Hamiltonian
     
-    Corresponds to sublattices ``\otimes`` Bragg vector indices, ``m``.
+    Corresponds to sublattices ``\\otimes`` Bragg vector indices, ``m``.
     
     """
 
@@ -99,7 +99,7 @@ class _DetailsSuper(typing.NamedTuple):
         Scalar value that operators are multiplied by.
     processed_super_operators : tuple
         Tuple of ``(is_conjugate, m)`` pairs where ``is_conjugate=False`` 
-        is :math:`\hat{\kappa}` and True is :math:`\hat{\kappa}^\dagger` and 
+        is :math:`\\hat{\kappa}` and True is :math:`\\hat{\kappa}^\dagger` and 
         ``m`` is the index of a Bragg vector in the basis - see 
         ``details_super().m``.
     is_off_diagonal : bool
@@ -172,7 +172,7 @@ class ModelSuperlattice2D(abstracts.Model2D, ModelSuperlattice):
             Scalar value that operators are multiplied by.
         operators : iterable of {"k", "kc", int, iterable of ints}
             Iterable of operators from left to right. "k" is
-            :math:`\hat{\kappa}`, "kc" is :math:`\hat{\kappa}^\dagger`,
+            :math:`\\hat{\kappa}`, "kc" is :math:`\\hat{\kappa}^\dagger`,
             :math:`m` gives a first star vector,
             :math:`e^{i \\boldsymbol{G}_m \cdot \\boldsymbol{r}}`, and
             an iterable of ints, :math:`(m_1, ...)`, gives a general vector,
@@ -545,7 +545,7 @@ class ModelSuperlattice2D(abstracts.Model2D, ModelSuperlattice):
         Returns
         -------
         basis : tuple
-            Hamiltonian basis. Corresponds to sublattices ``\otimes`` Bragg
+            Hamiltonian basis. Corresponds to sublattices ``\\otimes`` Bragg
             vector indices.
 
         """

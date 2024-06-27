@@ -307,7 +307,6 @@ class ModelSuperlattice2D(abstracts.Model2D, ModelSuperlattice):
         """Internal zero magnetic field mSL-reconstructed Hamiltonian"""
 
         details = self.details(**model_kwargs)
-        details.dim
 
         details_super = self.details_super(M=M, **model_kwargs)
         shape_super = details_super.shape_super

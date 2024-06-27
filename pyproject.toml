@@ -10,18 +10,23 @@ authors = [
 ]
 description = "A collection of models for electronic calculations"
 readme = "README.md"
-requires-python = ">=3.5"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-dependencies = [
-    "numpy",
-    "scipy",
-    "tqdm",
-]
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
 
 [project.urls]
 Homepage = "https://github.com/spoopydale/cm_models"
 Issues = "https://github.com/spoopydale/cm_models/issues"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+pythonpath = ["src"]
+testpaths = ["tests"]

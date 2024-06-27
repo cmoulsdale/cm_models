@@ -1,8 +1,6 @@
 """Bilayer graphene.
 """
 
-import abc
-
 import math
 import numpy as np
 

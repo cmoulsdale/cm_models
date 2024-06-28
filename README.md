@@ -66,3 +66,5 @@ fig.tight_layout()
 
 plt.show()
 ```
+
+Other examples are available in the examples directory.

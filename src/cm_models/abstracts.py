@@ -949,7 +949,7 @@ class Model2D(Model):
         B_padded = B[..., None]
 
         details_levels = self.details_levels(N=N, **function_kwargs)
-        dim_levels = details_levels.dim
+        dim_levels = details_levels.dim_levels
 
         H = np.zeros([*B.shape, dim_levels, dim_levels], dtype=complex)
 

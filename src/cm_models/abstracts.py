@@ -959,7 +959,7 @@ class Model2D(Model):
             B_exponent,
             value,
             is_off_diagonal,
-        ) in details_levels.processed_elements:
+        ) in details_levels.processed_levels_elements:
             if is_off_diagonal and fill_upper:
                 temp = B_padded**B_exponent * value
                 H[..., n1, n2] += temp

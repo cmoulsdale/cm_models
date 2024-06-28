@@ -30,14 +30,14 @@ class SLG(Graphene):
         Delta_AB=(0.0, "Sublattice potential asymmetry. [eV]"),
     )
 
-    def sublattices(self, **model_kwargs):
+    def sublattices(self, **function_kwargs):
         return ("A", "B")
 
     def fill_namespace(self):
         # velocities
         self.v0 = 0.5 * np.sqrt(3.0) * self.a * self.g0
 
-    def extra_major_elements(self, *, K_plus, **model_kwargs):
+    def extra_major_elements(self, *, K_plus, **function_kwargs):
         yield from self.resolve_valley(
             [
                 # gamma0
@@ -46,7 +46,7 @@ class SLG(Graphene):
             K_plus,
         )
 
-    def extra_minor_elements(self, *, K_plus, **model_kwargs):
+    def extra_minor_elements(self, *, K_plus, **function_kwargs):
         # on site potentials
         yield ("A", "A", 0.5 * self.Delta_AB, ())
         yield ("B", "B", -0.5 * self.Delta_AB, ())
@@ -71,7 +71,7 @@ class SLGHBN(GrapheneHBNSuperlatticeUV, SLG):
         self.WBB = self.WBB_b + self.WBB_t
         self.WBA = self.WBA_b + self.WBA_t
 
-    def extra_super_elements(self, *, K_plus, **model_kwargs):
+    def extra_super_elements(self, *, K_plus, **function_kwargs):
         yield from self.uV_super_elements("A", "B", K_plus)
 
 

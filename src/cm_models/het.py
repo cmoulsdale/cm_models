@@ -134,21 +134,21 @@ class ModelSuperlattice2D(abstracts.Model2D, ModelSuperlattice):
         else:
             return value
 
-    def extra_super_elements(self, **model_kwargs) -> Iterator[Iterable]:
+    def extra_super_elements(self, **function_kwargs) -> Iterator[Iterable]:
         """Iterable of extra super matrix elements.
 
-        See ``super_elements(**model_kwargs)``.
+        See ``super_elements(**function_kwargs)``.
 
         """
 
         yield from ()
 
     @util.process_args
-    def super_elements(self, **model_kwargs) -> Iterator[Iterable]:
+    def super_elements(self, **function_kwargs) -> Iterator[Iterable]:
         """Iterator of superlattice matrix elements.
 
         Assembled from all classes in inheritance tree with
-        ``extra_super_elements(**model_kwargs)`` generator function defined.
+        ``extra_super_elements(**function_kwargs)`` generator function defined.
 
         Added to Hamiltonian ``H`` according to
         ``H[i1, i2] += value * operators``.
@@ -159,13 +159,13 @@ class ModelSuperlattice2D(abstracts.Model2D, ModelSuperlattice):
 
         Parameters
         ----------
-        **model_kwargs
-            Model-specific keyword arguments - see ``function_parameters()``.
+        **function_kwargs
+            Model-specific keyword arguments - see ``function_kwargs()``.
 
         Yields
         ------
         i1
-            Sublattice component 1 - see ``basis(**model_kwargs)``.
+            Sublattice component 1 - see ``basis(**function_kwargs)``.
         i2
             Sublattice component 2.
         value : Number
@@ -182,19 +182,19 @@ class ModelSuperlattice2D(abstracts.Model2D, ModelSuperlattice):
         """
 
         yield from itertools.chain.from_iterable(
-            extra_super_elements(self, **model_kwargs)
+            extra_super_elements(self, **function_kwargs)
             for extra_super_elements in self.hierarchy("extra_super_elements")
         )
 
     @functools.cache
     @util.process_args
-    def details_super(self, *, M: int, **model_kwargs) -> _DetailsSuper:
+    def details_super(self, *, M: int, **function_kwargs) -> _DetailsSuper:
         """Get the model's zone-folded details"""
 
         if self.msl_dims > self.dims:
             raise ValueError("number of superlattice dimensions exceeds dimensions")
 
-        details = self.details(**model_kwargs)
+        details = self.details(**function_kwargs)
         dim = details.dim
 
         details_superlattice = self.details_superlattice(M=M)
@@ -207,7 +207,7 @@ class ModelSuperlattice2D(abstracts.Model2D, ModelSuperlattice):
         partial_details_super = []
         points = set()
         for n1, n2, value, operators, is_off_diagonal in self.process_elements(
-            self.super_elements(**model_kwargs), details.inverse_basis
+            self.super_elements(**function_kwargs), details.inverse_basis
         ):
             details_super = []
 
@@ -302,13 +302,13 @@ class ModelSuperlattice2D(abstracts.Model2D, ModelSuperlattice):
         fill_upper: bool = False,
         *,
         M: int,
-        **model_kwargs,
+        **function_kwargs,
     ) -> npt.NDArray[np.complexfloating]:
         """Internal zero magnetic field mSL-reconstructed Hamiltonian"""
 
-        details = self.details(**model_kwargs)
+        details = self.details(**function_kwargs)
 
-        details_super = self.details_super(M=M, **model_kwargs)
+        details_super = self.details_super(M=M, **function_kwargs)
         shape_super = details_super.shape_super
         dim_super = details_super.dim_super
         G_extended = details_super.G_extended
@@ -360,11 +360,11 @@ class ModelSuperlattice2D(abstracts.Model2D, ModelSuperlattice):
 
     @util.process_args
     def H_super(
-        self, kx: npt.ArrayLike, ky: npt.ArrayLike, M: int = 3, **model_kwargs
+        self, kx: npt.ArrayLike, ky: npt.ArrayLike, M: int = 3, **function_kwargs
     ) -> npt.NDArray[np.complexfloating]:
         """Zero magnetic field mSL-reconstructed Hamiltonian.
 
-        Hamiltonian has dimensionality ``dim_super`` - see ``dim_super(**model_kwargs)``.
+        Hamiltonian has dimensionality ``dim_super`` - see ``dim_super(**function_kwargs)``.
 
         Parameters
         ----------
@@ -376,8 +376,8 @@ class ModelSuperlattice2D(abstracts.Model2D, ModelSuperlattice):
             shape with ``kx``.
         M : int, optional
             Number of stars of non-zero Bragg vectors. (default is 3)
-        **model_kwargs
-            Model-specific keyword arguments - see ``function_parameters()``.
+        **function_kwargs
+            Model-specific keyword arguments - see ``function_kwargs()``.
 
         Returns
         -------
@@ -386,7 +386,7 @@ class ModelSuperlattice2D(abstracts.Model2D, ModelSuperlattice):
 
         """
 
-        return self._H_super(kx, ky, M=M, **model_kwargs)
+        return self._H_super(kx, ky, M=M, **function_kwargs)
 
     @util.process_args
     def e_super(
@@ -397,11 +397,11 @@ class ModelSuperlattice2D(abstracts.Model2D, ModelSuperlattice):
         bands: typing.Optional[npt.ArrayLike] = None,
         chunksize: int = 0,
         verbose: bool = False,
-        **model_kwargs,
+        **function_kwargs,
     ) -> npt.NDArray[np.floating]:
         """Zero magnetic field mSL-reconstructed energy eigenvalues.
 
-        Hamiltonian has dimensionality ``dim_super`` - see ``dim_super(**model_kwargs)``.
+        Hamiltonian has dimensionality ``dim_super`` - see ``dim_super(**function_kwargs)``.
 
         Parameters
         ----------
@@ -422,8 +422,8 @@ class ModelSuperlattice2D(abstracts.Model2D, ModelSuperlattice):
         verbose : bool, optional
             Show progressbar for calculation if ``chunksize``>1. (default is
             False)
-        **model_kwargs
-            Model-specific keyword arguments - see ``function_parameters()``.
+        **function_kwargs
+            Model-specific keyword arguments - see ``function_kwargs()``.
 
         Returns
         -------
@@ -445,7 +445,7 @@ class ModelSuperlattice2D(abstracts.Model2D, ModelSuperlattice):
             self._H_super,
             bands,
             M=M,
-            **model_kwargs,
+            **function_kwargs,
         )
 
     @util.process_args
@@ -457,11 +457,11 @@ class ModelSuperlattice2D(abstracts.Model2D, ModelSuperlattice):
         bands: typing.Optional[npt.ArrayLike] = None,
         chunksize: int = 0,
         verbose: bool = False,
-        **model_kwargs,
+        **function_kwargs,
     ) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.complexfloating]]:
         """Zero magnetic field mSL-reconstructed energy eigenvalues and eigenvectors.
 
-        Hamiltonian has dimensionality ``dim_super`` - see ``dim_super(**model_kwargs)``.
+        Hamiltonian has dimensionality ``dim_super`` - see ``dim_super(**function_kwargs)``.
 
         Parameters
         ----------
@@ -482,8 +482,8 @@ class ModelSuperlattice2D(abstracts.Model2D, ModelSuperlattice):
         verbose : bool, optional
             Show progressbar for calculation if ``chunksize``>1. (default is
             False)
-        **model_kwargs
-            Model-specific keyword arguments - see ``function_parameters()``.
+        **function_kwargs
+            Model-specific keyword arguments - see ``function_kwargs()``.
 
         Returns
         -------
@@ -507,19 +507,19 @@ class ModelSuperlattice2D(abstracts.Model2D, ModelSuperlattice):
             self._H_super,
             bands,
             M=M,
-            **model_kwargs,
+            **function_kwargs,
         )
 
     @util.process_args
-    def dim_super(self, M: int = 3, **model_kwargs):
+    def dim_super(self, M: int = 3, **function_kwargs):
         """Dimensionality of zero magnetic field mSL-reconstructed Hamiltonian.
 
         Parameters
         ----------
         M : int, optional
             Number of stars of non-zero Bragg vectors. (default is 3)
-        **model_kwargs
-            Model-specific keyword arguments - see ``function_parameters()``.
+        **function_kwargs
+            Model-specific keyword arguments - see ``function_kwargs()``.
 
         Returns
         -------
@@ -528,18 +528,18 @@ class ModelSuperlattice2D(abstracts.Model2D, ModelSuperlattice):
 
         """
 
-        return self.details_super(M=M, **model_kwargs).dim_super
+        return self.details_super(M=M, **function_kwargs).dim_super
 
     @util.process_args
-    def basis_super(self, M: int = 3, **model_kwargs):
+    def basis_super(self, M: int = 3, **function_kwargs):
         """Basis of zero magnetic field mSL-reconstructed Hamiltonian.
 
         Parameters
         ----------
         M : int, optional
             Number of stars of non-zero Bragg vectors. (default is 3)
-        **model_kwargs
-            Model-specific keyword arguments - see ``function_parameters()``.
+        **function_kwargs
+            Model-specific keyword arguments - see ``function_kwargs()``.
 
         Returns
         -------
@@ -549,4 +549,4 @@ class ModelSuperlattice2D(abstracts.Model2D, ModelSuperlattice):
 
         """
 
-        return self.details_super(M=M, **model_kwargs).basis_super
+        return self.details_super(M=M, **function_kwargs).basis_super

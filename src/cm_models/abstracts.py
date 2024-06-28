@@ -108,8 +108,8 @@ class Base(abc.ABC):
     def default_model_parameters(cls) -> dict:
         """Default model parameters.
 
-        Defines the default keyword arguments, ``kwargs``, for the class
-        initialiser, ``__init__(**kwargs)``.
+        Defines the default keyword arguments, ``model_kwargs``, for the class
+        initialiser, ``__init__(**model_kwargs)``.
 
         Built up from the class hierarchy of optional
         ``extra_model_parameters()`` dictionary attributes, with sub classes
@@ -154,16 +154,16 @@ class Base(abc.ABC):
         return util.pseudo_docstring(cls.default_model_parameters())
 
     extra_function_parameters: dict
-    """Extra default function parameters - see ``function_parameters()``."""
+    """Extra default function parameters - see ``default_function_parameters()``."""
 
     @classmethod
     def default_function_parameters(cls) -> dict:
         """Default function parameters.
 
-        Defines the model-specific keyword arguments, ``model_kwargs``, with
+        Defines the model-specific keyword arguments, ``function_kwargs``, with
         scalar values for user-facing functions,
-        ``func(*args, **method_kwargs, **model_kwargs)``,
-        where ``*args`` are the array-like arguments and ``**method_kwargs``
+        ``func(*args, **eval_kwargs, **function_kwargs)``,
+        where ``*args`` are the array-like arguments and ``**eval_kwargs``
         are scalar-valued keyword arguments which determine evaluation of
         that function specifically.
 
@@ -199,15 +199,15 @@ class Base(abc.ABC):
 
         return util.pseudo_docstring(cls.default_function_parameters())
 
-    default_model_kwargs: dict
+    default_function_kwargs: dict
     """Default model-specific keyword arguments for functions"""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **model_kwargs):
         """Initialize the model.
 
         Parameters
         ----------
-        **kwargs
+        **model_kwargs
             Model parameters - see ``default_model_parameters()``.
 
         Raises
@@ -221,7 +221,7 @@ class Base(abc.ABC):
         default_model_parameters = self.default_model_parameters()
 
         unrecognized_parameters = [
-            name for name in kwargs if name not in default_model_parameters
+            name for name in model_kwargs if name not in default_model_parameters
         ]
         if unrecognized_parameters:
             raise ValueError(
@@ -229,13 +229,13 @@ class Base(abc.ABC):
                 "see ``default_model_parameters()``."
             )
 
-        full_kwargs = {
-            name: kwargs.get(name, default_value)
+        full_model_kwargs = {
+            name: model_kwargs.get(name, default_value)
             for name, (default_value, description) in default_model_parameters.items()
         }
 
         missing_parameters = [
-            name for name, value in full_kwargs.items() if isinstance(value, type)
+            name for name, value in full_model_kwargs.items() if isinstance(value, type)
         ]
         if missing_parameters:
             raise ValueError(
@@ -243,9 +243,9 @@ class Base(abc.ABC):
                 "see ``default_model_parameters()``."
             )
 
-        self.__dict__.update(full_kwargs)
+        self.__dict__.update(full_model_kwargs)
 
-        self.default_model_kwargs = {
+        self.default_function_kwargs = {
             name: default_value
             for name, (
                 default_value,
@@ -267,7 +267,7 @@ class Model(Base):
     """Number of dimensions"""
 
     @abc.abstractmethod
-    def sublattices(self, **model_kwargs) -> Iterable:
+    def sublattices(self, **function_kwargs) -> Iterable:
         """Sublattices of model.
 
         Returns
@@ -283,7 +283,7 @@ class _Details(typing.NamedTuple):
     basis: tuple
     """Basis of sublattices.
     
-    Equal to ``sublattices(**model_kwargs)``.
+    Equal to ``sublattices(**function_kwargs)``.
     
     """
 
@@ -296,7 +296,7 @@ class _Details(typing.NamedTuple):
     processed_major_elements: tuple[int, int, numbers.Number, tuple, bool]
     """Processed major elements
 
-    See ``major_elements(**model_kwargs)``.
+    See ``major_elements(**function_kwargs)``.
     
     Yields
     -------
@@ -317,7 +317,7 @@ class _Details(typing.NamedTuple):
     processed_minor_elements: tuple[int, int, numbers.Number, tuple, bool]
     """Processed minor elements
 
-    See ``minor_elements(**model_kwargs)``.
+    See ``minor_elements(**function_kwargs)``.
     
     Yields
     -------
@@ -411,27 +411,27 @@ class Model2D(Model):
     
     """
 
-    def extra_minor_elements(self, **model_kwargs) -> Iterator[Iterable]:
+    def extra_minor_elements(self, **function_kwargs) -> Iterator[Iterable]:
         """Iterable of extra minor matrix elements.
 
-        See ``minor_elements(**model_kwargs)``.
+        See ``minor_elements(**function_kwargs)``.
 
         """
 
         yield from ()
 
     @util.process_args
-    def minor_elements(self, **model_kwargs) -> Iterator[Iterable]:
+    def minor_elements(self, **function_kwargs) -> Iterator[Iterable]:
         """Iterator of minor matrix elements.
 
         Assembled from all classes in inheritance tree with
-        ``extra_minor_elements(**model_kwargs)`` generator function defined.
+        ``extra_minor_elements(**function_kwargs)`` generator function defined.
 
         Added to Hamiltonian ``H`` according to
         ``H[i1, i2] += value * operators``.
 
         Unlike the major matrix elements from
-        ``major_elements(**model_kwargs)``, these are not used to determine
+        ``major_elements(**function_kwargs)``, these are not used to determine
         the basis of Landau levels.
 
         warning::
@@ -440,13 +440,13 @@ class Model2D(Model):
 
         Parameters
         ----------
-        **model_kwargs
-            Model-specific keyword arguments - see ``function_parameters()``.
+        **function_kwargs
+            Model-specific keyword arguments - see ``default_function_parameters()``.
 
         Yields
         ------
         i1
-            Sublattice component 1 - see ``basis(**model_kwargs)``.
+            Sublattice component 1 - see ``basis(**function_kwargs)``.
         i2
             Sublattice component 2.
         value : Number
@@ -458,25 +458,25 @@ class Model2D(Model):
         """
 
         yield from itertools.chain.from_iterable(
-            extra_minor_elements(self, **model_kwargs)
+            extra_minor_elements(self, **function_kwargs)
             for extra_minor_elements in self.hierarchy("extra_minor_elements")
         )
 
-    def extra_major_elements(self, **model_kwargs) -> Iterator[Iterable]:
+    def extra_major_elements(self, **function_kwargs) -> Iterator[Iterable]:
         """Iterable of extra major matrix elements.
 
-        See ``major_elements(**model_kwargs)``.
+        See ``major_elements(**function_kwargs)``.
 
         """
 
         yield from ()
 
     @util.process_args
-    def major_elements(self, **model_kwargs) -> Iterator[Iterable]:
+    def major_elements(self, **function_kwargs) -> Iterator[Iterable]:
         """Iterator of major matrix elements.
 
         Assembled from all classes in inheritance tree with
-        ``extra_minor_elements(**model_kwargs)`` generator function defined.
+        ``extra_minor_elements(**function_kwargs)`` generator function defined.
 
         The major matrix elements define the cutoff of the Landau level basis
         in each sublattice such that the conjugate momentum operator,
@@ -493,13 +493,13 @@ class Model2D(Model):
 
         Parameters
         ----------
-        **model_kwargs
-            Model-specific keyword arguments - see ``function_parameters()``.
+        **function_kwargs
+            Model-specific keyword arguments - see ``default_function_parameters()``.
 
         Yields
         ------
         i1
-            Sublattice component 1 - see ``basis(**model_kwargs)``.
+            Sublattice component 1 - see ``basis(**function_kwargs)``.
         i2
             Sublattice component 2.
         value : Number
@@ -511,7 +511,7 @@ class Model2D(Model):
         """
 
         yield from itertools.chain.from_iterable(
-            extra_major_elements(self, **model_kwargs)
+            extra_major_elements(self, **function_kwargs)
             for extra_major_elements in self.hierarchy("extra_major_elements")
         )
 
@@ -542,10 +542,10 @@ class Model2D(Model):
 
     @functools.cache
     @util.process_args
-    def details(self, **model_kwargs) -> _Details:
+    def details(self, **function_kwargs) -> _Details:
         """Get the model details"""
 
-        sublattices = tuple(self.sublattices(**model_kwargs))
+        sublattices = tuple(self.sublattices(**function_kwargs))
         dim = len(sublattices)
         inverse_basis = dict(zip(sublattices, range(dim)))
 
@@ -555,12 +555,12 @@ class Model2D(Model):
             inverse_basis=inverse_basis,
             processed_major_elements=tuple(
                 self.process_elements(
-                    self.major_elements(**model_kwargs), inverse_basis
+                    self.major_elements(**function_kwargs), inverse_basis
                 )
             ),
             processed_minor_elements=tuple(
                 self.process_elements(
-                    self.minor_elements(**model_kwargs), inverse_basis
+                    self.minor_elements(**function_kwargs), inverse_basis
                 )
             ),
         )
@@ -586,12 +586,16 @@ class Model2D(Model):
             return value
 
     def _H(
-        self, kx: npt.NDArray, ky: npt.NDArray, fill_upper: bool = False, **model_kwargs
+        self,
+        kx: npt.NDArray,
+        ky: npt.NDArray,
+        fill_upper: bool = False,
+        **function_kwargs,
     ) -> npt.NDArray[np.complexfloating]:
         k = kx + 1j * ky
         kc = k.conjugate()
 
-        details = self.details(**model_kwargs)
+        details = self.details(**function_kwargs)
         dim = details.dim
 
         H = np.zeros([*k.shape, dim, dim], dtype=complex)
@@ -609,11 +613,11 @@ class Model2D(Model):
 
     @util.process_args
     def H(
-        self, kx: npt.ArrayLike, ky: npt.ArrayLike, **model_kwargs
+        self, kx: npt.ArrayLike, ky: npt.ArrayLike, **function_kwargs
     ) -> npt.NDArray[np.complexfloating]:
         """Zero magnetic field Hamiltonian.
 
-        Hamiltonian has dimensionality ``dim`` - see ``dim(**model_kwargs)``.
+        Hamiltonian has dimensionality ``dim`` - see ``dim(**function_kwargs)``.
 
         Parameters
         ----------
@@ -623,8 +627,8 @@ class Model2D(Model):
         ky : array_like
             x-component of wavevector. Must be real and broadcast to common
             shape with ``kx``.
-        **model_kwargs
-            Model-specific keyword arguments - see ``function_parameters()``.
+        **function_kwargs
+            Model-specific keyword arguments - see ``default_function_parameters()``.
 
         Returns
         -------
@@ -633,7 +637,7 @@ class Model2D(Model):
 
         """
 
-        return self._H(kx, ky, fill_upper=True, **model_kwargs)
+        return self._H(kx, ky, fill_upper=True, **function_kwargs)
 
     @util.process_args
     def e(
@@ -643,11 +647,11 @@ class Model2D(Model):
         bands: typing.Optional[npt.ArrayLike] = None,
         chunksize: int = 0,
         verbose: bool = False,
-        **model_kwargs,
+        **function_kwargs,
     ) -> npt.NDArray[np.floating]:
         """Zero magnetic field energy eigenvalues.
 
-        Hamiltonian has dimensionality ``dim`` - see ``dim(**model_kwargs)``.
+        Hamiltonian has dimensionality ``dim`` - see ``dim(**function_kwargs)``.
 
         Parameters
         ----------
@@ -666,8 +670,8 @@ class Model2D(Model):
         verbose : bool, optional
             Show progressbar for calculation if ``chunksize``>1. (default is
             False)
-        **model_kwargs
-            Model-specific keyword arguments - see ``function_parameters()``.
+        **function_kwargs
+            Model-specific keyword arguments - see ``default_function_parameters()``.
 
         Returns
         -------
@@ -682,7 +686,13 @@ class Model2D(Model):
         """
 
         return util.chunker(
-            util.e_func, chunksize, verbose, (kx, ky), self._H, bands, **model_kwargs
+            util.e_func,
+            chunksize,
+            verbose,
+            (kx, ky),
+            self._H,
+            bands,
+            **function_kwargs,
         )
 
     @util.process_args
@@ -693,11 +703,11 @@ class Model2D(Model):
         bands: typing.Optional[npt.ArrayLike] = None,
         chunksize: int = 0,
         verbose: bool = False,
-        **model_kwargs,
+        **function_kwargs,
     ) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.complexfloating]]:
         """Zero magnetic field energy eigenvalues and eigenvectors.
 
-        Hamiltonian has dimensionality ``dim`` - see ``dim(**model_kwargs)``.
+        Hamiltonian has dimensionality ``dim`` - see ``dim(**function_kwargs)``.
 
         Parameters
         ----------
@@ -716,8 +726,8 @@ class Model2D(Model):
         verbose : bool, optional
             Show progressbar for calculation if ``chunksize``>1. (default is
             False)
-        **model_kwargs
-            Model-specific keyword arguments - see ``function_parameters()``.
+        **function_kwargs
+            Model-specific keyword arguments - see ``default_function_parameters()``.
 
         Returns
         -------
@@ -740,18 +750,17 @@ class Model2D(Model):
             (kx, ky),
             self._H,
             bands,
-            **model_kwargs,
+            **function_kwargs,
         )
 
     @util.process_args
-    def dim(self, **model_kwargs) -> int:
+    def dim(self, **function_kwargs) -> int:
         """Dimensionality of zero magnetic field Hamiltonian.
 
         Parameters
         ----------
-        **model_kwargs
-            Model-specific keyword arguments - see
-            py:class:`models.abstracts.Model.function_parameters`.
+        **function_kwargs
+            Model-specific keyword arguments - see ``default_function_parameters()``.
 
         Returns
         -------
@@ -760,16 +769,16 @@ class Model2D(Model):
 
         """
 
-        return self.details(**model_kwargs).dim
+        return self.details(**function_kwargs).dim
 
     @util.process_args
-    def basis(self, **model_kwargs) -> tuple:
+    def basis(self, **function_kwargs) -> tuple:
         """Basis of zero magnetic field Hamiltonian.
 
         Parameters
         ----------
-        **model_kwargs
-            Model-specific keyword arguments - see ``function_parameters()``.
+        **function_kwargs
+            Model-specific keyword arguments - see ``default_function_parameters()``.
 
         Returns
         -------
@@ -778,7 +787,7 @@ class Model2D(Model):
 
         """
 
-        return self.details(**model_kwargs).basis
+        return self.details(**function_kwargs).basis
 
     @staticmethod
     def process_levels_elements(
@@ -840,10 +849,10 @@ class Model2D(Model):
 
     @functools.cache
     @util.process_args
-    def details_levels(self, *, N: int, **model_kwargs) -> _DetailsLevels:
+    def details_levels(self, *, N: int, **function_kwargs) -> _DetailsLevels:
         """Get the model's finite magnetic field details"""
 
-        details = self.details(**model_kwargs)
+        details = self.details(**function_kwargs)
         dim = details.dim
 
         partial_details_levels = []
@@ -933,13 +942,13 @@ class Model2D(Model):
         )
 
     def _H_levels(
-        self, B: npt.NDArray, fill_upper: bool = False, *, N: int, **model_kwargs
+        self, B: npt.NDArray, fill_upper: bool = False, *, N: int, **function_kwargs
     ) -> npt.NDArray[np.complexfloating]:
         """Internal finite magnetic field Hamiltonian."""
 
         B_padded = B[..., None]
 
-        details_levels = self.details_levels(N=N, **model_kwargs)
+        details_levels = self.details_levels(N=N, **function_kwargs)
         dim_levels = details_levels.dim
 
         H = np.zeros([*B.shape, dim_levels, dim_levels], dtype=complex)
@@ -962,11 +971,11 @@ class Model2D(Model):
 
     @util.process_args
     def H_levels(
-        self, B: npt.ArrayLike, N: int = 100, **model_kwargs
+        self, B: npt.ArrayLike, N: int = 100, **function_kwargs
     ) -> npt.NDArray[np.complexfloating]:
         """Finite magnetic field Hamiltonian.
 
-        Hamiltonian has dimensionality ``dim_levels`` - see ``dim_levels(**model_kwargs)``.
+        Hamiltonian has dimensionality ``dim_levels`` - see ``dim_levels(**function_kwargs)``.
 
         Parameters
         ----------
@@ -974,9 +983,8 @@ class Model2D(Model):
             Magnetic field. Must be real.
         N : int, optional
             Maximum number of basis levels in each sublattice. (default is 100)
-        **model_kwargs
-            Model-specific keyword arguments - see
-            ``default_function_parameters()``.
+        **function_kwargs
+            Model-specific keyword arguments - see ``default_function_parameters()``.
 
         Returns
         -------
@@ -985,7 +993,7 @@ class Model2D(Model):
 
         """
 
-        return self._H_levels(B, fill_upper=True, N=N, **model_kwargs)
+        return self._H_levels(B, fill_upper=True, N=N, **function_kwargs)
 
     @util.process_args
     def e_levels(
@@ -995,11 +1003,11 @@ class Model2D(Model):
         bands: typing.Optional[npt.ArrayLike] = None,
         chunksize: int = 0,
         verbose: bool = False,
-        **model_kwargs,
+        **function_kwargs,
     ) -> npt.NDArray[np.floating]:
         """Finite magnetic field energy eigenvalues.
 
-        Hamiltonian has dimensionality ``dim_levels`` - see ``dim_levels(**model_kwargs)``.
+        Hamiltonian has dimensionality ``dim_levels`` - see ``dim_levels(**function_kwargs)``.
 
         Parameters
         ----------
@@ -1016,8 +1024,8 @@ class Model2D(Model):
         verbose : bool, optional
             Show progressbar for calculation if ``chunksize``>1. (default is
             False)
-        **model_kwargs
-            Model-specific keyword arguments - see ``function_parameters()``.
+        **function_kwargs
+            Model-specific keyword arguments - see ``default_function_parameters()``.
 
         Returns
         -------
@@ -1039,7 +1047,7 @@ class Model2D(Model):
             self._H_levels,
             bands,
             N=N,
-            **model_kwargs,
+            **function_kwargs,
         )
 
     @util.process_args
@@ -1050,11 +1058,11 @@ class Model2D(Model):
         bands: typing.Optional[npt.ArrayLike] = None,
         chunksize: int = 0,
         verbose: bool = False,
-        **model_kwargs,
+        **function_kwargs,
     ) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.complexfloating]]:
         """Finite magnetic field energy eigenvalues and eigenvectors.
 
-        Hamiltonian has dimensionality ``dim_levels`` - see ``dim_levels(**model_kwargs)``.
+        Hamiltonian has dimensionality ``dim_levels`` - see ``dim_levels(**function_kwargs)``.
 
         Parameters
         ----------
@@ -1071,8 +1079,8 @@ class Model2D(Model):
         verbose : bool, optional
             Show progressbar for calculation if ``chunksize``>1. (default is
             False)
-        **model_kwargs
-            Model-specific keyword arguments - see ``function_parameters()``.
+        **function_kwargs
+            Model-specific keyword arguments - see ``default_function_parameters()``.
 
         Returns
         -------
@@ -1096,20 +1104,19 @@ class Model2D(Model):
             self._H_levels,
             bands,
             N=N,
-            **model_kwargs,
+            **function_kwargs,
         )
 
     @util.process_args
-    def dim_levels(self, N: int = 100, **model_kwargs) -> int:
+    def dim_levels(self, N: int = 100, **function_kwargs) -> int:
         """Dimensionality of finite magnetic field Hamiltonian.
 
         Parameters
         ----------
         N : int, optional
             Maximum number of basis levels in each sublattice. (default is 100)
-        **model_kwargs
-            Model-specific keyword arguments - see
-            py:class:`models.abstracts.Model.function_parameters`.
+        **function_kwargs
+            Model-specific keyword arguments - see ``default_function_parameters()``.
 
         Returns
         -------
@@ -1118,18 +1125,18 @@ class Model2D(Model):
 
         """
 
-        return self.details_levels(N=N, **model_kwargs).dim
+        return self.details_levels(N=N, **function_kwargs).dim
 
     @util.process_args
-    def basis_levels(self, N: int = 100, **model_kwargs) -> tuple:
+    def basis_levels(self, N: int = 100, **function_kwargs) -> tuple:
         """Basis of finite magnetic field Hamiltonian.
 
         Parameters
         ----------
         N : int, optional
             Maximum number of basis levels in each sublattice. (default is 100)
-        **model_kwargs
-            Model-specific keyword arguments - see ``function_parameters()``.
+        **function_kwargs
+            Model-specific keyword arguments - see ``default_function_parameters()``.
 
         Returns
         -------
@@ -1138,4 +1145,4 @@ class Model2D(Model):
 
         """
 
-        return self.details_levels(N=N, **model_kwargs).basis
+        return self.details_levels(N=N, **function_kwargs).basis

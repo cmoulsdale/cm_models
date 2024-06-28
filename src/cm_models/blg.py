@@ -59,10 +59,10 @@ class BLG(BLG_ABC):
 
     """
 
-    def sublattices(self, **model_kwargs):
+    def sublattices(self, **function_kwargs):
         return ("A0", "B0", "A1", "B1")
 
-    def extra_major_elements(self, *, K_plus, **model_kwargs):
+    def extra_major_elements(self, *, K_plus, **function_kwargs):
         # gamma1
         yield ("A1", "B0", self.g1, ())
 
@@ -75,7 +75,7 @@ class BLG(BLG_ABC):
             K_plus,
         )
 
-    def extra_minor_elements(self, *, K_plus, **model_kwargs):
+    def extra_minor_elements(self, *, K_plus, **function_kwargs):
         # on site potentials
         yield ("A0", "A0", 0.5 * (self.Delta_AB - self.Delta_U), ())
         yield (
@@ -105,7 +105,7 @@ class BLG(BLG_ABC):
 
 
 class BLG2(BLG_ABC):
-    def sublattices(self, **model_kwargs):
+    def sublattices(self, **function_kwargs):
         return ("A0", "B1")
 
     def fill_namespace(self):
@@ -115,13 +115,13 @@ class BLG2(BLG_ABC):
         # particle-hole symmetry
         self.alpha = 2.0 * self.v4 / self.v0 + self.Delta_p / self.g1
 
-    def extra_major_elements(self, *, K_plus, **model_kwargs):
+    def extra_major_elements(self, *, K_plus, **function_kwargs):
         # mass
         yield from self.resolve_valley(
             [("B1", "A0", -1.0 / (2.0 * self.m), ("k", "k"))], K_plus
         )
 
-    def extra_minor_elements(self, *, K_plus, **model_kwargs):
+    def extra_minor_elements(self, *, K_plus, **function_kwargs):
         # on site potentials
         yield ("A0", "A0", -0.5 * self.Delta_U, ())
         yield ("B1", "B1", 0.5 * self.Delta_U, ())
@@ -161,7 +161,7 @@ class BLGHBN(BLG, GrapheneHBNSuperlatticeUV):
         self.uV_fill_namespace("_b")
         self.uV_fill_namespace("_t")
 
-    def extra_super_elements(self, *, K_plus, **model_kwargs):
+    def extra_super_elements(self, *, K_plus, **function_kwargs):
         yield from self.uV_super_elements("A0", "B0", K_plus, "_b")
         yield from self.uV_super_elements("A1", "B1", K_plus, "_t")
 
@@ -219,7 +219,7 @@ class BLG2HBN(GrapheneHBNSuperlatticeUV, BLG2):
         self.uV_fill_namespace("_b")
         self.uV_fill_namespace("_t")
 
-    def extra_super_elements(self, *, K_plus, **model_kwargs):
+    def extra_super_elements(self, *, K_plus, **function_kwargs):
         if any(
             [self.u0p_t, self.u0m_t, self.u1p_t, self.u1m_t, self.u3p_t, self.u3m_t]
         ):

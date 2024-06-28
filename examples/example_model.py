@@ -42,10 +42,10 @@ class Model(abstracts.Model2D):
     """
     Add function parameters in the same format as model parameters.
 
-    These are model-specific keyword arguments, ``model_kwargs``, with
+    These are model-specific keyword arguments, ``function_kwargs``, with
     scalar values for user-facing functions,
-    ``func(*args, **method_kwargs, **model_kwargs)``,
-    where ``*args`` are the array-like arguments and ``**method_kwargs``
+    ``func(*args, **eval_kwargs, **function_kwargs)``,
+    where ``*args`` are the array-like arguments and ``**eval_kwargs``
     are scalar-valued keyword arguments which determine evaluation of
     that function specifically.
     """
@@ -65,16 +65,16 @@ class Model(abstracts.Model2D):
     dims = 2
     """Dimensionality of Hamiltonian (number of sublattices)"""
 
-    def sublattices(self, *, K_plus, **model_kwargs):
+    def sublattices(self, *, K_plus, **function_kwargs):
         """Return the sublattices"""
 
         return ("A", "B")
 
-    def extra_major_elements(self, *, K_plus, **model_kwargs):
+    def extra_major_elements(self, *, K_plus, **function_kwargs):
         """
         Yield major matrix elements, of the form
         i1
-            Sublattice component 1 - see ``basis(**model_kwargs)``.
+            Sublattice component 1 - see ``basis(**function_kwargs)``.
         i2
             Sublattice component 2.
         value : Number
@@ -107,7 +107,7 @@ class Model(abstracts.Model2D):
             # - kx + i ky: -kc
             yield ("B", "A", -self.rescaled_v, ("kc",))
 
-    def extra_minor_elements(self, *, K_plus, **model_kwargs):
+    def extra_minor_elements(self, *, K_plus, **function_kwargs):
         """
         The minor elements have the same format as the major elements, except
         they don't determine the Landau level basis.
@@ -150,7 +150,7 @@ class GaplessModelSquareSuperlattice(
         u0=(0.0, "the strength of an mSL-periodic scalar potential")
     )
 
-    def extra_super_elements(self, *, K_plus, **model_kwargs):
+    def extra_super_elements(self, *, K_plus, **function_kwargs):
         """
         mSL-periodic scalar potential has an equal harmonic, ``u0``,
         for each of the shortest mSL Bragg vectors

@@ -165,7 +165,7 @@ def process_args(
 
     @functools.wraps(func)
     def wrapper(model: type[abstracts.Base], *args: P.args, **kwargs: P.kwargs) -> T:
-        full_kwargs = model.default_model_kwargs.copy()
+        full_kwargs = model.default_function_kwargs.copy()
         full_kwargs.update(kwargs)
 
         missing_parameters = [

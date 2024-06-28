@@ -103,7 +103,7 @@ class Superlattice(abstracts.Base):
     @abc.abstractmethod
     @functools.cache
     @util.process_args
-    def details_superlattice(self, **model_kwargs) -> _DetailsSuperlattice:
+    def details_superlattice(self, **function_kwargs) -> _DetailsSuperlattice:
         """Get the superlattice details"""
 
     @property
@@ -136,7 +136,7 @@ class Superlattice1D2D(Superlattice):
 
     @functools.cache
     @util.process_args
-    def details_superlattice(self, *, M: int, **model_kwargs) -> _DetailsSuperlattice:
+    def details_superlattice(self, *, M: int, **function_kwargs) -> _DetailsSuperlattice:
         """Get the superlattice details with ``M`` stars"""
 
         # non-zero positive vectors within number of stars
@@ -184,7 +184,7 @@ class SuperlatticeSquare2D(Superlattice):
 
     @functools.cache
     @util.process_args
-    def details_superlattice(self, *, M: int, **model_kwargs) -> _DetailsSuperlattice:
+    def details_superlattice(self, *, M: int, **function_kwargs) -> _DetailsSuperlattice:
         """Get the superlattice details with ``M`` stars"""
 
         # non-zero vectors in first quadrant within number of stars
@@ -258,7 +258,7 @@ class SuperlatticeTriangular2D(Superlattice):
 
     @functools.cache
     @util.process_args
-    def details_superlattice(self, *, M: int, **model_kwargs) -> _DetailsSuperlattice:
+    def details_superlattice(self, *, M: int, **function_kwargs) -> _DetailsSuperlattice:
         """Get the superlattice details with ``M`` stars"""
 
         # non-zero vectors in first sextant within number of stars

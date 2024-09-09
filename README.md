@@ -1,4 +1,4 @@
-![Python workflow](https://github.com/spoopydale/cm_models/actions/workflows/python-package.yml/badge.svg) [![Documentation Status](https://readthedocs.org/projects/cm_models/badge/?version=latest)](https://cm-models.readthedocs.io/en/latest/?badge=latest)
+![Python workflow](https://github.com/cmoulsdale/cm_models/actions/workflows/python-package.yml/badge.svg) [![Documentation Status](https://readthedocs.org/projects/cm_models/badge/?version=latest)](https://cm-models.readthedocs.io/en/latest/?badge=latest)
 
 # Models Package
 
@@ -13,7 +13,7 @@ Documentation is available at https://cm-models.readthedocs.io/en/latest.
 Install from github with Python>=3.10:
 
 ```bash
-  pip install git+https://github.com/spoopydale/cm_models
+  pip install git+https://github.com/cmoulsdale/cm_models
 ```
 
 ## Features
